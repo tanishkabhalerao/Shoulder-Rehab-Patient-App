@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Shoulder Rehab Patient",
+    "slug": "shoulder-rehab-patient",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "shoulder-rehab-patient",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#F5F7F3",
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {},
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow access to choose a shoulder exercise reference image.",
+          "cameraPermission": "Allow the camera to capture a shoulder movement snapshot.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

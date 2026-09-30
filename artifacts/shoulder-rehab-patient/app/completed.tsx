@@ -1,0 +1,1 @@
+export { CompletionScreen as default } from '@/src/screens/history';

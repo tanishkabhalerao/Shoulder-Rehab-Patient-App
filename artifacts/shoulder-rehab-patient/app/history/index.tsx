@@ -1,0 +1,1 @@
+export { SessionHistoryScreen as default } from '@/src/screens/history';
