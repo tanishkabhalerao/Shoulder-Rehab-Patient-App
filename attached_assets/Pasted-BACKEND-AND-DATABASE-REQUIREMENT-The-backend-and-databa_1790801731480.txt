@@ -1,0 +1,164 @@
+BACKEND AND DATABASE REQUIREMENT:
+
+The backend and database are a critical part of this project.
+
+Inspect the existing backend, database and Drizzle schema first.
+
+DO NOT create a second backend or second database.
+
+Use the existing Express + PostgreSQL + Drizzle architecture if it is already present.
+
+Extend the existing database to support the complete two-role physiotherapy platform.
+
+Create or update the following entities:
+
+User
+- id
+- name
+- email
+- password/auth identifier
+- role: patient | physiotherapist
+- createdAt
+
+Patient
+- id
+- userId
+- age
+- gender
+- condition
+- physiotherapistId
+- rehabilitationStatus
+
+Physiotherapist
+- id
+- userId
+- specialization
+
+Exercise
+- id
+- name
+- description
+- bodyPart
+- difficulty
+- instructions
+- precautions
+
+ExercisePlan
+- id
+- patientId
+- physiotherapistId
+- name
+- startDate
+- endDate
+- status
+
+ExercisePlanItem
+- id
+- planId
+- exerciseId
+- sets
+- repetitions
+- duration
+- frequency
+- instructions
+
+ExerciseSession
+- id
+- patientId
+- exerciseId
+- planId
+- startedAt
+- completedAt
+- duration
+- targetRepetitions
+- completedRepetitions
+- rangeOfMotion
+- postureScore
+- performanceScore
+- status
+
+PoseAnalysis
+- id
+- sessionId
+- landmarkName
+- x
+- y
+- z
+- visibility
+- jointAngle
+- timestamp
+
+Progress
+- id
+- patientId
+- sessionId
+- rangeOfMotion
+- postureScore
+- performanceScore
+- repetitions
+- recordedAt
+
+DigitalTwin
+- id
+- patientId
+- currentStatus
+- currentPerformance
+- currentROM
+- currentPostureScore
+- updatedAt
+
+Create the necessary foreign keys and relationships.
+
+Then create backend APIs for:
+
+- authentication
+- role-based login
+- patients
+- physiotherapists
+- exercises
+- exercise plans
+- assigning exercises
+- exercise sessions
+- pose analysis
+- progress
+- digital twin
+- dashboard statistics
+
+Make sure the Patient and Physiotherapist dashboards use these APIs instead of hardcoded data.
+
+After modifying the schema:
+
+1. Generate/update the Drizzle migrations/schema.
+2. Push the schema to the development database.
+3. Seed demo users, patients and exercises.
+4. Verify database relationships.
+5. Test all API endpoints.
+6. Fix TypeScript/build errors.
+
+IMPORTANT:
+
+Never expose DATABASE_URL or other secrets in frontend code.
+
+Use environment variables for credentials.
+
+The final database must allow this exact flow:
+
+PHYSIOTHERAPIST
+→ creates exercise plan
+→ assigns exercise to patient
+→ database
+
+PATIENT
+→ retrieves assigned plan
+→ performs exercise
+→ MediaPipe/OpenCV analyzes movement
+→ session data saved
+
+DATABASE
+→ stores session + pose + performance data
+
+PHYSIOTHERAPIST
+→ retrieves patient session
+→ views progress
+→ views Digital Twin
+→ updates exercise plan
