@@ -7,19 +7,27 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { DEMO_PATIENT, DEMO_SESSIONS, EXERCISES, getExercise } from './data';
+import { DEMO_PATIENT, DEMO_PHYSIOTHERAPIST, DEMO_SESSIONS, EXERCISES, SAMPLE_PATIENTS } from './data';
 import type {
   ActiveSession,
   EmergencyAlert,
+  Exercise,
   ExerciseSession,
   Patient,
+  Physiotherapist,
   SessionFeedback,
+  UserRole,
 } from './models';
 
-const STORAGE_KEY = 'shoulder-rehab-patient.v1';
+const STORAGE_KEY = 'shoulder-rehab-platform.v2';
 
 interface PersistedData {
   patient: Patient;
+  physiotherapist: Physiotherapist;
+  patients: Patient[];
+  exercises: Exercise[];
+  assignedExerciseIds: Record<string, string[]>;
+  role: UserRole | null;
   isAuthenticated: boolean;
   sessions: ExerciseSession[];
   feedback: SessionFeedback[];
@@ -29,6 +37,15 @@ interface PersistedData {
 
 const INITIAL_DATA: PersistedData = {
   patient: DEMO_PATIENT,
+  physiotherapist: DEMO_PHYSIOTHERAPIST,
+  patients: SAMPLE_PATIENTS,
+  exercises: EXERCISES,
+  assignedExerciseIds: {
+    [DEMO_PATIENT.id]: ['shoulder-flexion', 'shoulder-abduction', 'seated-arm-raise', 'external-rotation'],
+    'PT-0314': ['shoulder-abduction', 'shoulder-flexion'],
+    'PT-0187': ['seated-arm-raise', 'external-rotation'],
+  },
+  role: null,
   isAuthenticated: false,
   sessions: DEMO_SESSIONS,
   feedback: [],
@@ -39,15 +56,22 @@ const INITIAL_DATA: PersistedData = {
 interface AppContextValue extends PersistedData {
   hydrated: boolean;
   storageError: boolean;
+  role: UserRole | null;
   activeSession: ActiveSession | null;
   latestSession: ExerciseSession | null;
-  signIn: (email: string, password: string) => string | null;
-  continueAsDemo: () => void;
+  assignedExercises: Exercise[];
+  signIn: (email: string, password: string, selectedRole: UserRole) => string | null;
+  continueAsDemo: (selectedRole: UserRole) => void;
   register: (values: Pick<Patient, 'fullName' | 'email' | 'age' | 'gender' | 'phone'>, password: string) => void;
   pauseSession: () => void;
   signOut: () => void;
   updateProfile: (profile: Partial<Patient>) => void;
   updateDemoPassword: (current: string, next: string) => string | null;
+  addExercise: (exercise: Omit<Exercise, 'id'>) => Exercise;
+  updateExercise: (id: string, exercise: Partial<Exercise>) => void;
+  deleteExercise: (id: string) => void;
+  assignExercise: (patientId: string, exerciseId: string) => void;
+  findExercise: (id: string | undefined) => Exercise | undefined;
   startSession: (exerciseId: string) => ActiveSession;
   tickSession: () => void;
   togglePause: () => void;
@@ -99,29 +123,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [data, hydrated]);
 
   const signIn = useCallback(
-    (email: string, password: string): string | null => {
+    (email: string, password: string, selectedRole: UserRole): string | null => {
       if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
         return 'Enter a valid email address.';
       }
-      if (password !== data.demoPassword) return 'That password does not match this demo profile.';
-      if (email.trim().toLowerCase() !== data.patient.email.toLowerCase()) {
-        return 'No demo profile uses that email. Create a local demo account first.';
+      const expectedEmail = selectedRole === 'patient' ? data.patient.email : data.physiotherapist.email;
+      const expectedPassword = selectedRole === 'patient' ? data.demoPassword : 'Physio123';
+      if (password !== expectedPassword) return 'That password does not match this demo profile.';
+      if (email.trim().toLowerCase() !== expectedEmail.toLowerCase()) {
+        return `No ${selectedRole} demo profile uses that email.`;
       }
       setData((current) => ({
         ...current,
         isAuthenticated: true,
-        patient:
-          email.toLowerCase() === current.patient.email.toLowerCase()
-            ? current.patient
-            : { ...current.patient, email: email.trim() },
+        role: selectedRole,
       }));
       return null;
     },
-    [data.demoPassword, data.patient.email],
+    [data.demoPassword, data.patient.email, data.physiotherapist.email],
   );
 
-  const continueAsDemo = useCallback(() => {
-    setData((current) => ({ ...current, isAuthenticated: true }));
+  const continueAsDemo = useCallback((selectedRole: UserRole) => {
+    setData((current) => ({ ...current, isAuthenticated: true, role: selectedRole }));
   }, []);
 
   const register = useCallback(
@@ -129,6 +152,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setData((current) => ({
         ...current,
         isAuthenticated: true,
+        role: 'patient',
         demoPassword: password,
         patient: {
           ...current.patient,
@@ -143,7 +167,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(() => {
-    setData((current) => ({ ...current, isAuthenticated: false }));
+    setData((current) => ({ ...current, isAuthenticated: false, role: null }));
     setActiveSession(null);
   }, []);
 
@@ -156,6 +180,56 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setData((previous) => ({ ...previous, demoPassword: next }));
     return null;
   }, [data.demoPassword]);
+
+  const findExercise = useCallback(
+    (id: string | undefined): Exercise | undefined => data.exercises.find((exercise) => exercise.id === id),
+    [data.exercises],
+  );
+
+  const assignedExercises = useMemo(
+    () => data.exercises.filter((exercise) => (data.assignedExerciseIds[data.patient.id] ?? []).includes(exercise.id)),
+    [data.assignedExerciseIds, data.exercises, data.patient.id],
+  );
+
+  const addExercise = useCallback((exercise: Omit<Exercise, 'id'>): Exercise => {
+    const created: Exercise = { ...exercise, id: `exercise-${Date.now().toString(36)}` };
+    setData((current) => ({ ...current, exercises: [...current.exercises, created] }));
+    return created;
+  }, []);
+
+  const updateExercise = useCallback((id: string, exercise: Partial<Exercise>) => {
+    setData((current) => ({
+      ...current,
+      exercises: current.exercises.map((item) => (item.id === id ? { ...item, ...exercise } : item)),
+    }));
+  }, []);
+
+  const deleteExercise = useCallback((id: string) => {
+    setData((current) => ({
+      ...current,
+      exercises: current.exercises.filter((exercise) => exercise.id !== id),
+      assignedExerciseIds: Object.fromEntries(
+        Object.entries(current.assignedExerciseIds).map(([patientId, exerciseIds]) => [
+          patientId,
+          exerciseIds.filter((exerciseId) => exerciseId !== id),
+        ]),
+      ),
+    }));
+  }, []);
+
+  const assignExercise = useCallback((patientId: string, exerciseId: string) => {
+    setData((current) => {
+      const currentAssignments = current.assignedExerciseIds[patientId] ?? [];
+      if (currentAssignments.includes(exerciseId)) return current;
+      return {
+        ...current,
+        assignedExerciseIds: {
+          ...current.assignedExerciseIds,
+          [patientId]: [...currentAssignments, exerciseId],
+        },
+      };
+    });
+  }, []);
 
   const startSession = useCallback((exerciseId: string): ActiveSession => {
     const session: ActiveSession = {
@@ -188,27 +262,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const countRep = useCallback(() => {
     setActiveSession((current) => {
       if (!current) return current;
-      const exercise = getExercise(current.exerciseId);
+      const exercise = findExercise(current.exerciseId);
       if (!exercise || current.currentRep >= exercise.reps) return current;
       return { ...current, currentRep: current.currentRep + 1 };
     });
-  }, []);
+  }, [findExercise]);
 
   const completeSet = useCallback(() => {
     setActiveSession((current) => {
       if (!current) return current;
-      const exercise = getExercise(current.exerciseId);
+      const exercise = findExercise(current.exerciseId);
       if (!exercise || current.currentRep < exercise.reps || current.currentSet >= exercise.sets) {
         return current;
       }
       return { ...current, currentSet: current.currentSet + 1, currentRep: 0 };
     });
-  }, []);
+  }, [findExercise]);
 
   const finishSession = useCallback(
     (status: 'Completed' | 'Ended early' = 'Completed'): ExerciseSession | null => {
       if (!activeSession) return null;
-      const exercise = getExercise(activeSession.exerciseId);
+      const exercise = findExercise(activeSession.exerciseId);
       if (!exercise) return null;
       const setsCompleted =
         status === 'Completed'
@@ -229,6 +303,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         repsCompleted,
         qualityScore: 89,
         shoulderRom: 76,
+        postureScore: 88,
         status,
         isDemo: true,
       };
@@ -236,13 +311,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setActiveSession(null);
       return session;
     },
-    [activeSession, data.patient.id],
+    [activeSession, data.patient.id, findExercise],
   );
 
   const sendEmergencyAlert = useCallback(
     (message: string): EmergencyAlert | null => {
       if (!activeSession) return null;
-      const exercise = getExercise(activeSession.exerciseId);
+      const exercise = findExercise(activeSession.exerciseId);
       if (!exercise) return null;
       const alert: EmergencyAlert = {
         id: createId('ALT'),
@@ -260,7 +335,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setData((current) => ({ ...current, alerts: [alert, ...current.alerts] }));
       return alert;
     },
-    [activeSession, data.patient.fullName, data.patient.id],
+    [activeSession, data.patient.fullName, data.patient.id, findExercise],
   );
 
   const saveFeedback = useCallback((values: Omit<SessionFeedback, 'id' | 'date'>) => {
@@ -278,8 +353,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...data,
       hydrated,
       storageError,
+      role: data.role,
       activeSession,
       latestSession,
+      assignedExercises,
       signIn,
       continueAsDemo,
       register,
@@ -287,6 +364,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       signOut,
       updateProfile,
       updateDemoPassword,
+      addExercise,
+      updateExercise,
+      deleteExercise,
+      assignExercise,
+      findExercise,
       startSession,
       tickSession,
       togglePause,
@@ -300,6 +382,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       data,
       hydrated,
       storageError,
+      assignedExercises,
       activeSession,
       latestSession,
       signIn,
@@ -309,6 +392,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       signOut,
       updateProfile,
       updateDemoPassword,
+      addExercise,
+      updateExercise,
+      deleteExercise,
+      assignExercise,
+      findExercise,
       startSession,
       tickSession,
       togglePause,

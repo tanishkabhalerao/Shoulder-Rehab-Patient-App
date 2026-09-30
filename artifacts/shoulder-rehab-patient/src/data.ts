@@ -1,15 +1,55 @@
-import type { Exercise, ExerciseSession, MovementData, Patient } from './models';
+import type {
+  Exercise,
+  ExerciseSession,
+  MovementData,
+  Patient,
+  Physiotherapist,
+  PoseAnalysis,
+  PoseLandmark,
+} from './models';
 
 export const DEMO_PATIENT: Patient = {
   id: 'PT-0248',
   fullName: 'Alex Morgan',
-  email: 'alex.morgan@example.com',
+  email: 'patient@test.com',
   age: 34,
   gender: 'Prefer not to say',
   phone: '+1 (555) 010-2048',
   physiotherapist: 'Jordan Lee',
-  focus: 'Shoulder',
+  focus: 'Shoulder rehabilitation',
 };
+
+export const DEMO_PHYSIOTHERAPIST: Physiotherapist = {
+  id: 'PT-0001',
+  fullName: 'Jordan Lee',
+  email: 'physio@test.com',
+  specialty: 'Orthopaedic physiotherapy',
+  clinic: 'Motion Recovery Clinic',
+};
+
+export const SAMPLE_PATIENTS: Patient[] = [
+  DEMO_PATIENT,
+  {
+    id: 'PT-0314',
+    fullName: 'Tanishka Rao',
+    email: 'tanishka@example.com',
+    age: 29,
+    gender: 'Woman',
+    phone: '+1 (555) 010-3014',
+    physiotherapist: DEMO_PHYSIOTHERAPIST.fullName,
+    focus: 'Shoulder mobility',
+  },
+  {
+    id: 'PT-0187',
+    fullName: 'Marcus Chen',
+    email: 'marcus@example.com',
+    age: 46,
+    gender: 'Man',
+    phone: '+1 (555) 010-0187',
+    physiotherapist: DEMO_PHYSIOTHERAPIST.fullName,
+    focus: 'Post-operative recovery',
+  },
+];
 
 export const EXERCISES: Exercise[] = [
   {
@@ -23,6 +63,9 @@ export const EXERCISES: Exercise[] = [
     durationMinutes: 8,
     targetRom: null,
     position: 'Sit or stand comfortably with your shoulders relaxed.',
+    precautions: ['Stop if you feel sharp pain.', 'Keep the movement within a comfortable range.'],
+    requiredLandmarks: ['RIGHT_SHOULDER', 'RIGHT_ELBOW', 'RIGHT_WRIST'],
+    movementThreshold: 'Shoulder angle 45°–145°',
     instructions: [
       'Begin with your arm resting comfortably by your side.',
       'Raise the arm forward at a steady, comfortable pace.',
@@ -46,6 +89,9 @@ export const EXERCISES: Exercise[] = [
     durationMinutes: 10,
     targetRom: null,
     position: 'Stand tall or sit upright with your arm resting by your side.',
+    precautions: ['Avoid shrugging the shoulder.', 'Do not force the top of the movement.'],
+    requiredLandmarks: ['RIGHT_SHOULDER', 'RIGHT_ELBOW', 'RIGHT_WRIST'],
+    movementThreshold: 'Shoulder angle 30°–120°',
     instructions: [
       'Start with your arm relaxed beside you.',
       'Move your arm out to the side at a steady pace.',
@@ -69,6 +115,9 @@ export const EXERCISES: Exercise[] = [
     durationMinutes: 7,
     targetRom: null,
     position: 'Sit upright with both feet supported and your back relaxed.',
+    precautions: ['Keep your back supported.', 'Move slowly if the shoulder feels tired.'],
+    requiredLandmarks: ['RIGHT_SHOULDER', 'RIGHT_ELBOW', 'RIGHT_WRIST'],
+    movementThreshold: 'Shoulder angle 40°–110°',
     instructions: [
       'Sit in a stable chair and rest your arm by your side.',
       'Raise the arm in front of you through a comfortable range.',
@@ -91,6 +140,9 @@ export const EXERCISES: Exercise[] = [
     durationMinutes: 8,
     targetRom: null,
     position: 'Keep your elbow comfortably near your side.',
+    precautions: ['Keep the elbow close to your body.', 'Do not force the outward rotation.'],
+    requiredLandmarks: ['RIGHT_SHOULDER', 'RIGHT_ELBOW', 'RIGHT_WRIST'],
+    movementThreshold: 'Elbow angle 70°–110°',
     instructions: [
       'Begin with your elbow bent and close to your side.',
       'Rotate the forearm outward through a comfortable range.',
@@ -127,6 +179,7 @@ export const DEMO_SESSIONS: ExerciseSession[] = [
     qualityScore: 89,
     shoulderRom: 76,
     status: 'Completed',
+    postureScore: 88,
     isDemo: true,
   },
   {
@@ -140,6 +193,7 @@ export const DEMO_SESSIONS: ExerciseSession[] = [
     qualityScore: 85,
     shoulderRom: 74,
     status: 'Completed',
+    postureScore: 84,
     isDemo: true,
   },
   {
@@ -153,6 +207,7 @@ export const DEMO_SESSIONS: ExerciseSession[] = [
     qualityScore: 87,
     shoulderRom: 75,
     status: 'Completed',
+    postureScore: 86,
     isDemo: true,
   },
   {
@@ -166,6 +221,7 @@ export const DEMO_SESSIONS: ExerciseSession[] = [
     qualityScore: 87,
     shoulderRom: 72,
     status: 'Completed',
+    postureScore: 85,
     isDemo: true,
   },
 ];
@@ -173,6 +229,33 @@ export const DEMO_SESSIONS: ExerciseSession[] = [
 export function getExercise(id: string | undefined): Exercise | undefined {
   return EXERCISES.find((exercise) => exercise.id === id);
 }
+
+export const DEMO_LANDMARKS: PoseLandmark[] = [
+  { name: 'RIGHT_SHOULDER', x: 0.52, y: 0.41, z: -0.12, visibility: 0.96 },
+  { name: 'RIGHT_ELBOW', x: 0.66, y: 0.55, z: -0.1, visibility: 0.94 },
+  { name: 'RIGHT_WRIST', x: 0.75, y: 0.39, z: -0.08, visibility: 0.91 },
+  { name: 'LEFT_SHOULDER', x: 0.47, y: 0.41, z: -0.1, visibility: 0.97 },
+  { name: 'LEFT_ELBOW', x: 0.34, y: 0.56, z: -0.08, visibility: 0.92 },
+  { name: 'LEFT_WRIST', x: 0.25, y: 0.41, z: -0.05, visibility: 0.89 },
+  { name: 'RIGHT_HIP', x: 0.54, y: 0.67, z: -0.06, visibility: 0.98 },
+  { name: 'RIGHT_KNEE', x: 0.55, y: 0.82, z: -0.03, visibility: 0.97 },
+  { name: 'RIGHT_ANKLE', x: 0.55, y: 0.96, z: -0.01, visibility: 0.95 },
+];
+
+export const DEMO_POSE_ANALYSIS: PoseAnalysis = {
+  exerciseId: 'shoulder-abduction',
+  capturedAt: '2026-09-30T17:42:00.000Z',
+  landmarks: DEMO_LANDMARKS,
+  jointAngles: [
+    { name: 'Elbow angle', value: 176, landmarks: ['RIGHT_SHOULDER', 'RIGHT_ELBOW', 'RIGHT_WRIST'], status: 'good' },
+    { name: 'Shoulder angle', value: 112, landmarks: ['RIGHT_HIP', 'RIGHT_SHOULDER', 'RIGHT_ELBOW'], status: 'good' },
+  ],
+  repetitionCount: 8,
+  postureScore: 91,
+  performanceScore: 88,
+  feedback: 'Good movement. Keep the shoulder relaxed as you lower your arm.',
+  source: 'demo',
+};
 
 export function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');

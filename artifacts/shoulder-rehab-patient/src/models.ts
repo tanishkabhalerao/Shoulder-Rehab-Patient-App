@@ -1,3 +1,5 @@
+export type UserRole = 'patient' | 'physiotherapist';
+
 export interface Patient {
   id: string;
   fullName: string;
@@ -6,7 +8,7 @@ export interface Patient {
   gender: string;
   phone: string;
   physiotherapist: string;
-  focus: 'Shoulder';
+  focus: string;
 }
 
 export interface Exercise {
@@ -16,12 +18,15 @@ export interface Exercise {
   focus: string;
   sets: number;
   reps: number;
-  difficulty: 'Gentle' | 'Moderate';
+  difficulty: 'Gentle' | 'Moderate' | 'Challenging';
   durationMinutes: number;
   targetRom: number | null;
   instructions: string[];
   commonMistakes: string[];
   position: string;
+  precautions?: string[];
+  requiredLandmarks?: string[];
+  movementThreshold?: string;
 }
 
 export interface MovementData {
@@ -30,7 +35,7 @@ export interface MovementData {
   shoulderRom: number;
   movementQuality: number;
   repetitionCount: number;
-  isDemo: true;
+  isDemo: boolean;
 }
 
 export interface ExerciseSession {
@@ -44,7 +49,43 @@ export interface ExerciseSession {
   qualityScore: number;
   shoulderRom: number;
   status: 'Completed' | 'Ended early';
-  isDemo: true;
+  postureScore?: number;
+  isDemo: boolean;
+}
+
+export interface Physiotherapist {
+  id: string;
+  fullName: string;
+  email: string;
+  specialty: string;
+  clinic: string;
+}
+
+export interface PoseLandmark {
+  name: string;
+  x: number;
+  y: number;
+  z: number;
+  visibility: number;
+}
+
+export interface JointAngle {
+  name: string;
+  value: number;
+  landmarks: [string, string, string];
+  status: 'good' | 'attention';
+}
+
+export interface PoseAnalysis {
+  exerciseId: string;
+  capturedAt: string;
+  landmarks: PoseLandmark[];
+  jointAngles: JointAngle[];
+  repetitionCount: number;
+  postureScore: number;
+  performanceScore: number;
+  feedback: string;
+  source: 'demo' | 'mediapipe';
 }
 
 export interface SessionFeedback {

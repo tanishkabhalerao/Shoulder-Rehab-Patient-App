@@ -1,0 +1,1 @@
+export { PatientDigitalTwinScreen as default } from '@/src/screens/patient-extra';

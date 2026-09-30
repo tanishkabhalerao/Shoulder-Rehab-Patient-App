@@ -1,0 +1,1 @@
+export { PatientDetailsScreen as default } from '@/src/screens/physio';

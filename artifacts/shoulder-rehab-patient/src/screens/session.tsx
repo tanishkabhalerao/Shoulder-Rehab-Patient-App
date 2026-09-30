@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
-import { DEMO_MOVEMENT, formatDuration, getExercise } from '../data';
+import { DEMO_MOVEMENT, formatDuration } from '../data';
 import { useApp } from '../state';
 import {
   AppText,
@@ -32,8 +32,8 @@ import {
 export function ExerciseDetailScreen() {
   const colors = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const exercise = getExercise(id);
-  const { startSession } = useApp();
+  const { startSession, findExercise } = useApp();
+  const exercise = findExercise(id);
 
   if (!exercise) {
     return (
@@ -118,8 +118,9 @@ export function ActiveSessionScreen() {
     completeSet,
     finishSession,
     sendEmergencyAlert,
+    findExercise,
   } = useApp();
-  const exercise = getExercise(id) ?? getExercise(activeSession?.exerciseId);
+  const exercise = findExercise(id) ?? findExercise(activeSession?.exerciseId);
   const [cameraUri, setCameraUri] = useState<string | null>(null);
   const [cameraStatus, setCameraStatus] = useState('');
   const [showEmergency, setShowEmergency] = useState(false);

@@ -1,44 +1,56 @@
-# [Project name]
+# AI Digital Twin Physiotherapy
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An Expo mobile platform with separate patient and physiotherapist workspaces for rehabilitation plans, exercise sessions, progress, digital twins, and pose-analysis workflows.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/shoulder-rehab-patient run dev` — run the Expo app
+- `pnpm --filter @workspace/shoulder-rehab-patient run typecheck` — typecheck the mobile app
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/api-server run dev` — run the shared API scaffold
+
+The current physiotherapy workflow uses the existing Expo app's AsyncStorage context as a shared local demo store. The API and Drizzle packages remain scaffolds; no production database connection is claimed or required for the local demo.
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
+- API: Express 5 scaffold in `artifacts/api-server`
+- DB: PostgreSQL + Drizzle ORM scaffold in `lib/db`
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/shoulder-rehab-patient/app/(auth)` — role selection and login
+- `artifacts/shoulder-rehab-patient/app/(tabs)` — patient dashboard, exercises, progress, AI analysis, Digital Twin, and profile
+- `artifacts/shoulder-rehab-patient/app/(physio)` — physiotherapist dashboard, patients, plans, pose analysis, profiles, and patient drill-downs
+- `artifacts/shoulder-rehab-patient/src/state.tsx` — shared persisted demo store and patient/physiotherapist role boundary
+- `artifacts/shoulder-rehab-patient/src/pose.ts` — normalized pose-analysis adapter boundary for a future Python/OpenCV + MediaPipe service
+- `artifacts/shoulder-rehab-patient/src/data.ts` — demo accounts, patients, exercises, sessions, landmarks, and demo analysis values
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Patient and physiotherapist access are separate Expo Router groups and are selected before login.
+- The shared state store is the demo source of truth, so assignments and completed sessions flow between profiles on one device.
+- Camera access is preserved for patient sessions, but pose values are explicitly marked demo until a real inference service is connected.
+- Exercise records carry analysis metadata (required landmarks, thresholds, precautions) so the library is extensible beyond shoulder-only movements.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Patients can view assigned exercises, start sessions, capture a camera snapshot, record repetitions, inspect progress, review their Digital Twin, and inspect the pose-analysis interface. Physiotherapists can manage sample patients, create/edit/delete exercises, assign exercises, view sessions and trends, open patient Digital Twins, and inspect normalized landmark data and joint angles.
 
-## User preferences
+## Demo accounts
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Patient: `patient@test.com` / `Patient123`
+- Physiotherapist: `physio@test.com` / `Physio123`
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Live MediaPipe/OpenCV inference is not connected in the Expo client; demo pose values are labeled and isolated in `src/pose.ts`.
+- The local demo store is not multi-device persistence. Connect the existing API/database scaffolds before using real clinical data.
+- The Expo workflow may log a React Native DevTools `libglib-2.0.so.0` warning while Metro still serves the app.
 
 ## Pointers
 

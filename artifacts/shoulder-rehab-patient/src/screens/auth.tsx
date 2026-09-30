@@ -5,10 +5,12 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { useColors } from '@/hooks/useColors';
 import { useApp } from '../state';
+import type { UserRole } from '../models';
 import {
   AppText,
   BrandMark,
@@ -48,7 +50,7 @@ function AuthLayout({
         </View>
       </View>
       <View style={styles.authHeading}>
-        <Pill label="PATIENT APP" tone="good" />
+        <Pill label="AI DIGITAL TWIN PHYSIOTHERAPY" tone="good" />
         <AppText style={styles.authTitle}>{title}</AppText>
         <AppText muted style={styles.authSubtitle}>{subtitle}</AppText>
       </View>
@@ -63,25 +65,64 @@ function AuthLayout({
 export function LoginScreen() {
   const colors = useColors();
   const { signIn, continueAsDemo } = useApp();
-  const [email, setEmail] = useState('alex.morgan@example.com');
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [email, setEmail] = useState('patient@test.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const submit = () => {
-    const result = signIn(email, password);
+    if (!selectedRole) {
+      setError('Select a profile before signing in.');
+      return;
+    }
+    const result = signIn(email, password, selectedRole);
     if (result) {
       setError(result);
       return;
     }
-    router.replace('/(tabs)');
+    router.replace(selectedRole === 'patient' ? '/(tabs)' : '/(physio)');
   };
 
   return (
     <AuthLayout
       title="Your plan, in one place."
-      subtitle="Sign in to view the shoulder exercises your physiotherapist assigned."
+      subtitle="Choose your care profile to open the right workspace."
     >
+      <View style={styles.roleGrid}>
+        <ProfileChoice
+          icon="user"
+          title="Patient"
+          description="Exercises, sessions, progress and your Digital Twin."
+          selected={selectedRole === 'patient'}
+          onPress={() => {
+            setSelectedRole('patient');
+            setEmail('patient@test.com');
+            setPassword('');
+            setError('');
+          }}
+        />
+        <ProfileChoice
+          icon="heart"
+          title="Physiotherapist"
+          description="Patients, plans, sessions and clinical analysis."
+          selected={selectedRole === 'physiotherapist'}
+          onPress={() => {
+            setSelectedRole('physiotherapist');
+            setEmail('physio@test.com');
+            setPassword('');
+            setError('');
+          }}
+        />
+      </View>
       <Card style={styles.formCard}>
+        <View style={styles.loginContext}>
+          <Pill label={selectedRole ? selectedRole.toUpperCase() : 'SELECT A PROFILE'} tone={selectedRole ? 'good' : 'neutral'} />
+          <AppText muted style={styles.demoNote}>
+            {selectedRole === 'physiotherapist'
+              ? 'Professional workspace for managing rehabilitation plans and patient outcomes.'
+              : 'Personal workspace for completing assigned rehabilitation exercises.'}
+          </AppText>
+        </View>
         <Field
           label="Email"
           value={email}
@@ -111,24 +152,31 @@ export function LoginScreen() {
         >
           <AppText style={[styles.linkText, { color: colors.primary }]}>Forgot password?</AppText>
         </Pressable>
-        <Button label="Sign in" onPress={submit} icon="arrow-right" testID="login-submit" />
+        <Button
+          label={selectedRole === 'physiotherapist' ? 'Login as Physiotherapist' : 'Login as Patient'}
+          onPress={submit}
+          icon="arrow-right"
+          testID="login-submit"
+          disabled={!selectedRole}
+        />
         <View style={styles.divider}>
           <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
           <AppText muted style={styles.orText}>OR</AppText>
           <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
         </View>
         <Button
-          label="Continue with demo profile"
+          label={`Continue as ${selectedRole === 'physiotherapist' ? 'Physiotherapist' : 'Patient'}`}
           onPress={() => {
-            continueAsDemo();
-            router.replace('/(tabs)');
+            const role = selectedRole ?? 'patient';
+            continueAsDemo(role);
+            router.replace(role === 'patient' ? '/(tabs)' : '/(physio)');
           }}
           variant="secondary"
           icon="user"
           testID="demo-sign-in"
         />
         <AppText muted style={styles.demoNote}>
-          Demo credentials: alex.morgan@example.com · shoulder-demo. Demo sign-in is stored locally.
+          Patient: patient@test.com / Patient123 · Physiotherapist: physio@test.com / Physio123
         </AppText>
       </Card>
       <View style={styles.authFooter}>
@@ -138,6 +186,43 @@ export function LoginScreen() {
         </Pressable>
       </View>
     </AuthLayout>
+  );
+}
+
+function ProfileChoice({
+  icon,
+  title,
+  description,
+  selected,
+  onPress,
+}: {
+  icon: 'user' | 'heart';
+  title: string;
+  description: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  const colors = useColors();
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[
+        styles.profileChoice,
+        {
+          backgroundColor: selected ? colors.heroSoft : colors.card,
+          borderColor: selected ? colors.primary : colors.border,
+        },
+      ]}
+    >
+      <View style={[styles.profileChoiceIcon, { backgroundColor: selected ? colors.primary : colors.secondary }]}>
+        <Feather name={icon} size={20} color={selected ? colors.primaryForeground : colors.primary} />
+      </View>
+      <AppText style={styles.profileChoiceTitle}>{title}</AppText>
+      <AppText muted style={styles.profileChoiceDescription}>{description}</AppText>
+      {selected ? <Feather name="check-circle" size={18} color={colors.primary} /> : null}
+    </Pressable>
   );
 }
 
@@ -264,4 +349,10 @@ const styles = StyleSheet.create({
   flexField: { flex: 1 },
   genderBlock: { gap: 8 },
   fieldLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 13 },
+  roleGrid: { flexDirection: 'row', gap: 10 },
+  profileChoice: { flex: 1, borderWidth: 1, borderRadius: 20, padding: 14, gap: 8, minHeight: 170 },
+  profileChoiceIcon: { width: 42, height: 42, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  profileChoiceTitle: { fontFamily: 'Inter_700Bold', fontSize: 16, marginTop: 4 },
+  profileChoiceDescription: { fontSize: 11, lineHeight: 16, flex: 1 },
+  loginContext: { gap: 8, paddingBottom: 3 },
 });

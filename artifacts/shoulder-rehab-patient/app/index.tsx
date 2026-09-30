@@ -6,7 +6,7 @@ import { useApp } from '@/src/state';
 
 export default function IndexRoute() {
   const colors = useColors();
-  const { hydrated, isAuthenticated } = useApp();
+  const { hydrated, isAuthenticated, role } = useApp();
   if (!hydrated) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
@@ -14,5 +14,5 @@ export default function IndexRoute() {
       </View>
     );
   }
-  return <Redirect href={isAuthenticated ? '/(tabs)' : '/(auth)/login'} />;
+  return <Redirect href={isAuthenticated ? (role === 'physiotherapist' ? '/(physio)' : '/(tabs)') : '/(auth)/login'} />;
 }

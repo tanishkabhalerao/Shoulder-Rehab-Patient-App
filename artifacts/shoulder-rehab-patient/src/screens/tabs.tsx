@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { EXERCISES, TODAY_EXERCISE_IDS } from '../data';
+import { TODAY_EXERCISE_IDS } from '../data';
 import { useApp } from '../state';
 import type { Exercise } from '../models';
 import {
@@ -46,13 +46,14 @@ function ExerciseListRow({ exercise, index = 0 }: { exercise: Exercise; index?: 
 
 export function HomeScreen() {
   const colors = useColors();
-  const { patient, sessions } = useApp();
-  const nextExercise = EXERCISES[0];
-  const todayExercises = EXERCISES.filter((exercise) => TODAY_EXERCISE_IDS.includes(exercise.id));
+  const { patient, sessions, assignedExercises } = useApp();
+  const nextExercise = assignedExercises[0];
+  const todayExercises = assignedExercises.filter((exercise) => TODAY_EXERCISE_IDS.includes(exercise.id));
   const firstName = patient.fullName.split(' ')[0] || 'there';
   const dateLabel = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
   const recentSession = sessions[0];
 
+  if (!nextExercise) return null;
   return (
     <Screen>
       <View style={styles.homeHeader}>
@@ -151,7 +152,7 @@ export function HomeScreen() {
 
 export function ExercisesScreen() {
   const colors = useColors();
-  const { sessions } = useApp();
+  const { sessions, assignedExercises } = useApp();
   return (
     <Screen>
       <ScreenHeader title="Exercises" subtitle="Your assigned shoulder plan" />
@@ -163,10 +164,10 @@ export function ExercisesScreen() {
           <AppText style={styles.planTitle}>Shoulder movement plan</AppText>
           <AppText muted style={styles.rowMeta}>Assigned by your physiotherapist</AppText>
         </View>
-        <Pill label={`${EXERCISES.length} EXERCISES`} tone="good" />
+        <Pill label={`${assignedExercises.length} EXERCISES`} tone="good" />
       </View>
       <View style={styles.rowList}>
-        {EXERCISES.map((exercise, index) => {
+        {assignedExercises.map((exercise, index) => {
           const completed = sessions.some(
             (session) => session.exerciseId === exercise.id && session.status === 'Completed',
           );

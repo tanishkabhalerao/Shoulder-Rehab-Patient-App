@@ -1,0 +1,693 @@
+I need you to transform my existing project into ONE complete AI Digital Twin Physiotherapy Platform.
+
+IMPORTANT:
+The current project already contains my Patient Dashboard. KEEP the existing patient functionality and build the complete system around it.
+
+The most important requirement is:
+
+==================================================
+TWO DISTINCT USER PROFILES
+==================================================
+
+The LOGIN PAGE must clearly provide TWO profile options:
+
+        ┌─────────────────────┐
+        │      PATIENT        │
+        │   👤 Patient Login  │
+        └─────────────────────┘
+
+                 OR
+
+        ┌──────────────────────────┐
+        │     PHYSIOTHERAPIST      │
+        │   🩺 Physiotherapist     │
+        └──────────────────────────┘
+
+The user must select one profile before logging in.
+
+There must be TWO COMPLETELY DIFFERENT WORKFLOWS after login.
+
+==================================================
+PROFILE 1 — PATIENT
+==================================================
+
+When the user selects:
+
+PATIENT
+
+and logs in:
+
+→ Open ONLY the Patient Dashboard.
+
+Do NOT show the physiotherapist dashboard/navigation to the patient.
+
+Patient navigation should include:
+
+- Dashboard
+- My Exercises
+- Exercise Session
+- AI Exercise Analysis
+- Progress
+- Digital Twin
+- Profile
+- Logout
+
+Patient functionality:
+
+1. Patient Dashboard
+   - Welcome message
+   - Today's exercises
+   - Exercise completion
+   - Recent activity
+   - Progress summary
+
+2. My Exercises
+   - Exercises assigned by physiotherapist
+   - Sets
+   - Repetitions
+   - Duration
+   - Instructions
+   - Precautions
+
+3. Start Exercise
+   - Start exercise session
+   - Camera access
+   - Exercise instructions
+   - Repetition counting
+   - Exercise duration
+   - Real-time feedback
+
+4. AI Exercise Analysis
+   - Camera/video
+   - MediaPipe Pose
+   - Pose landmarks
+   - Body coordinates
+   - Joint angles
+   - Movement analysis
+   - Repetition detection
+   - Posture/form analysis
+   - Performance score
+
+5. Progress
+   - Completed exercises
+   - Repetitions
+   - ROM
+   - Posture score
+   - Performance score
+   - Progress charts
+
+6. Digital Twin
+   - Patient's rehabilitation status
+   - Exercise performance
+   - ROM
+   - Posture
+   - Progress history
+   - Session history
+
+7. Profile
+   - Patient information
+
+8. Logout
+
+==================================================
+PROFILE 2 — PHYSIOTHERAPIST
+==================================================
+
+When the user selects:
+
+PHYSIOTHERAPIST
+
+and logs in:
+
+→ Open ONLY the Physiotherapist Dashboard.
+
+The physiotherapist must NOT see the patient dashboard.
+
+Physiotherapist navigation should include:
+
+- Dashboard
+- My Patients
+- Patient Details
+- Exercise Library
+- Exercise Plans
+- Assign Exercises
+- Exercise Sessions
+- Progress
+- Computer Vision / Pose Analysis
+- Digital Twins
+- Profile
+- Logout
+
+==================================================
+PHYSIOTHERAPIST DASHBOARD
+==================================================
+
+Display:
+
+- Total Patients
+- Active Patients
+- Exercise Plans
+- Completed Sessions
+- Patients Currently Under Treatment
+- Recent Patient Activity
+
+Also display:
+
+- Recent sessions
+- Patient progress
+- Exercise completion
+- Performance trends
+
+==================================================
+MY PATIENTS
+==================================================
+
+Physiotherapist can:
+
+- View patients
+- Search patients
+- Open patient
+- View patient profile
+- View assigned exercises
+- View session history
+- View progress
+- View Digital Twin
+
+Example:
+
+Patient Card:
+
+Name
+Age
+Condition
+Current Exercise Plan
+Last Session
+Performance
+Progress
+
+Clicking a patient opens their complete patient details.
+
+==================================================
+EXERCISE PLAN MANAGEMENT
+==================================================
+
+Physiotherapist can:
+
+- Add exercise
+- Edit exercise
+- Delete exercise
+- Create exercise plan
+- Assign exercise to patient
+- Set sets
+- Set repetitions
+- Set duration
+- Add instructions
+- Add precautions
+
+Example:
+
+Patient:
+Tanishka
+
+Exercise:
+Shoulder Abduction
+
+Sets:
+3
+
+Repetitions:
+10
+
+Duration:
+15 minutes
+
+Instructions:
+Raise arm slowly while maintaining correct posture.
+
+Once assigned:
+
+Physiotherapist → Database → Patient Dashboard
+
+The patient should immediately see the assigned exercise.
+
+==================================================
+PATIENT → PHYSIOTHERAPIST DATA FLOW
+==================================================
+
+This must actually work.
+
+Physiotherapist assigns exercise:
+
+Physiotherapist
+      ↓
+Exercise Plan
+      ↓
+Database
+      ↓
+Patient Dashboard
+
+Patient performs exercise:
+
+Patient
+      ↓
+Camera
+      ↓
+MediaPipe / OpenCV
+      ↓
+Pose Landmarks
+      ↓
+Coordinates
+      ↓
+Joint Angles
+      ↓
+Movement Analysis
+      ↓
+Repetition Count
+      ↓
+Posture Score
+      ↓
+Performance
+      ↓
+Exercise Session
+      ↓
+Database
+      ↓
+Physiotherapist Dashboard
+
+The physiotherapist must be able to see the patient's completed exercise data.
+
+==================================================
+COMPUTER VISION / MEDIAPIPE
+==================================================
+
+Create a dedicated:
+
+"AI Exercise Analysis"
+
+page for the Patient.
+
+Also create:
+
+"Computer Vision / Pose Analysis"
+
+page for the Physiotherapist.
+
+The Computer Vision system should be structured around:
+
+OpenCV
+MediaPipe Pose
+Pose Landmarks
+Coordinates
+Joint Angles
+Movement Detection
+Repetition Counting
+Posture Analysis
+
+Track landmarks such as:
+
+- Shoulder
+- Elbow
+- Wrist
+- Hip
+- Knee
+- Ankle
+
+For each landmark support:
+
+X
+Y
+Z
+Visibility / Confidence
+
+Example:
+
+RIGHT_SHOULDER
+X: 0.52
+Y: 0.41
+Z: -0.12
+Visibility: 0.96
+
+Calculate joint angles using three landmarks.
+
+Example:
+
+Shoulder → Elbow → Wrist
+= Elbow Angle
+
+Hip → Shoulder → Elbow
+= Shoulder Angle
+
+==================================================
+EXERCISE ANALYSIS
+==================================================
+
+Initial exercises can include:
+
+- Shoulder Abduction
+- Shoulder Flexion
+- Elbow Flexion
+- Arm Raise
+
+But DO NOT hard-code the entire application only for shoulder rehabilitation.
+
+Create an extensible exercise-analysis architecture so more exercises can be added later.
+
+Each exercise should be able to define:
+
+- Required landmarks
+- Joint angles
+- Movement thresholds
+- Repetition rules
+- Correct posture
+- Feedback
+
+==================================================
+REAL-TIME FEEDBACK
+==================================================
+
+During the patient's exercise provide feedback such as:
+
+"Raise your arm higher"
+
+"Keep your elbow straight"
+
+"Move slowly"
+
+"Correct your posture"
+
+"Good movement"
+
+"Repetition completed"
+
+Where actual computer vision is available, feedback should be based on the detected pose.
+
+If OpenCV/MediaPipe cannot run directly in the current Replit frontend environment, DO NOT fake a fully functional AI system.
+
+Instead:
+
+- Create the proper CV service/API structure
+- Create the frontend interface
+- Create the data format for pose landmarks
+- Make the system ready for Python + OpenCV + MediaPipe integration
+
+Clearly separate real functionality from mock/demo data.
+
+==================================================
+DIGITAL TWIN
+==================================================
+
+Every patient must have a Digital Twin.
+
+The Digital Twin should use the patient's actual stored rehabilitation data:
+
+- Exercise plan
+- Completed exercises
+- Repetitions
+- ROM
+- Posture score
+- Performance score
+- Session history
+- Progress trends
+
+Patient can see their own Digital Twin information.
+
+Physiotherapist can see the patient's Digital Twin from:
+
+My Patients → Patient → Digital Twin
+
+==================================================
+DATABASE
+==================================================
+
+Use the EXISTING database.
+
+DO NOT create a separate database.
+
+Create/extend models for:
+
+Users
+Patients
+Physiotherapists
+Exercises
+Exercise Plans
+Exercise Plan Items
+Exercise Sessions
+Pose Analysis
+Progress
+Digital Twin
+
+User roles MUST be stored in the database:
+
+role = "patient"
+
+OR
+
+role = "physiotherapist"
+
+==================================================
+ROLE-BASED ACCESS
+==================================================
+
+This is extremely important.
+
+A PATIENT:
+
+✓ Can access Patient Dashboard
+✓ Can access their exercises
+✓ Can perform exercises
+✓ Can see their progress
+✓ Can see their Digital Twin
+
+A PATIENT:
+
+✗ Cannot access Physiotherapist Dashboard
+✗ Cannot view other patients
+✗ Cannot assign exercises
+✗ Cannot modify exercise plans
+
+A PHYSIOTHERAPIST:
+
+✓ Can access Physiotherapist Dashboard
+✓ Can view assigned patients
+✓ Can create exercise plans
+✓ Can assign exercises
+✓ Can view sessions
+✓ Can view progress
+✓ Can view Digital Twins
+✓ Can access Computer Vision analysis
+
+==================================================
+LOGIN SCREEN
+==================================================
+
+Create a professional login screen with:
+
+"AI Digital Twin Physiotherapy"
+
+Then two clearly visible profile cards/buttons:
+
+┌──────────────────────────────┐
+│          👤 PATIENT          │
+│                              │
+│      Continue as Patient     │
+└──────────────────────────────┘
+
+┌──────────────────────────────┐
+│      🩺 PHYSIOTHERAPIST      │
+│                              │
+│  Continue as Physiotherapist │
+└──────────────────────────────┘
+
+After selecting the profile:
+
+Show the appropriate login form.
+
+For example:
+
+PATIENT LOGIN
+
+Email
+Password
+Login as Patient
+
+
+PHYSIOTHERAPIST LOGIN
+
+Email
+Password
+Login as Physiotherapist
+
+The selected profile must be validated against the user's actual role stored in the database.
+
+Do NOT allow someone to select "Physiotherapist" and log into a patient account.
+
+==================================================
+DEMO ACCOUNTS
+==================================================
+
+Create demo accounts for testing.
+
+Example:
+
+PATIENT
+
+patient@test.com
+Password: Patient123
+
+PHYSIOTHERAPIST
+
+physio@test.com
+Password: Physio123
+
+Make sure the accounts have the correct roles.
+
+Create at least 3 sample patients for the physiotherapist to manage.
+
+==================================================
+UI
+==================================================
+
+Patient UI:
+
+Simple
+Clean
+Mobile-friendly
+Easy to understand
+
+Physiotherapist UI:
+
+Professional healthcare dashboard
+Sidebar
+Cards
+Tables
+Charts
+Patient cards
+Exercise management
+Digital Twin
+Computer Vision analysis
+
+The two dashboards should LOOK AND FUNCTION differently.
+
+==================================================
+IMPORTANT — EXISTING PROJECT
+==================================================
+
+The current project is already a Patient Dashboard.
+
+DO NOT:
+
+- Delete the patient dashboard
+- Replace everything with a new template
+- Create an unrelated second project
+- Create a separate backend
+- Create a separate database
+- Break existing patient features
+
+Instead:
+
+INSPECT CURRENT PROJECT
+↓
+KEEP EXISTING PATIENT FEATURES
+↓
+ADD ROLE-BASED LOGIN
+↓
+ADD PHYSIOTHERAPIST DASHBOARD
+↓
+CONNECT BOTH TO SAME BACKEND
+↓
+CONNECT BOTH TO SAME DATABASE
+↓
+ADD EXERCISE MANAGEMENT
+↓
+ADD SESSION DATA
+↓
+ADD COMPUTER VISION / MEDIAPIPE MODULE
+↓
+ADD DIGITAL TWIN
+↓
+TEST COMPLETE WORKFLOW
+
+==================================================
+FINAL COMPLETE FLOW
+==================================================
+
+LOGIN
+
+          ↓
+
+   SELECT PROFILE
+
+     ↙           ↘
+
+ PATIENT       PHYSIOTHERAPIST
+    ↓                 ↓
+PATIENT           PHYSIO
+DASHBOARD         DASHBOARD
+    ↓                 ↓
+My Exercises      My Patients
+    ↓                 ↓
+Start Exercise    Assign Exercise
+    ↓                 ↓
+Camera            Exercise Plan
+    ↓                 ↓
+MediaPipe         Database
+    ↓                 ↓
+Pose Analysis ← Session Data
+    ↓                 ↓
+Progress          Progress
+    ↓                 ↓
+Digital Twin ← Digital Twin
+    ↓
+Database
+
+==================================================
+FINAL TESTING
+==================================================
+
+After implementation:
+
+1. Run the application.
+2. Test Patient login.
+3. Test Physiotherapist login.
+4. Confirm they open different dashboards.
+5. Confirm patient cannot access physiotherapist routes.
+6. Confirm physiotherapist cannot accidentally enter patient-only routes.
+7. Test physiotherapist creating an exercise plan.
+8. Test assigning exercise to patient.
+9. Login as patient.
+10. Confirm assigned exercise appears.
+11. Test exercise session.
+12. Test Computer Vision/Pose Analysis page.
+13. Test saving session data.
+14. Login as physiotherapist.
+15. Confirm completed session appears.
+16. Confirm progress updates.
+17. Confirm Digital Twin updates.
+18. Run typecheck/build.
+19. Fix all errors.
+
+==================================================
+FINAL OUTPUT
+==================================================
+
+At the end, tell me:
+
+1. Files changed
+2. New pages created
+3. New APIs created
+4. Database changes
+5. Patient workflow
+6. Physiotherapist workflow
+7. Computer Vision/MediaPipe implementation
+8. What is fully functional
+9. What is currently mocked
+10. How to run the project
+11. Demo login credentials
+
+PRIORITY:
+
+FUNCTIONALITY > INTEGRATION > DATABASE > COMPUTER VISION > DIGITAL TWIN > UI POLISH
+
+Do not waste Agent tokens on unnecessary animations or decorative features.
+
+Build this as ONE COMPLETE PROJECT with TWO DISTINCT FUNCTIONING PROFILES.

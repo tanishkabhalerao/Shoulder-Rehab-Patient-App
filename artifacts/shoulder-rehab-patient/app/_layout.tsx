@@ -26,6 +26,7 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(physio)" />
       <Stack.Screen name="exercise/[id]" />
       <Stack.Screen name="session/[id]" />
       <Stack.Screen name="completed" />

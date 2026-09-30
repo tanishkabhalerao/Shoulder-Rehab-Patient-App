@@ -28,6 +28,14 @@ function NativeTabLayout() {
         <NativeTabs.Trigger.Icon sf={{ default: 'person.crop.circle', selected: 'person.crop.circle.fill' }} />
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="analysis">
+        <NativeTabs.Trigger.Icon sf={{ default: 'viewfinder', selected: 'viewfinder' }} />
+        <NativeTabs.Trigger.Label>AI Analysis</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="digital-twin">
+        <NativeTabs.Trigger.Icon sf={{ default: 'waveform.path.ecg', selected: 'waveform.path.ecg' }} />
+        <NativeTabs.Trigger.Label>Digital Twin</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
@@ -119,6 +127,20 @@ function ClassicTabLayout() {
             ) : (
               <Feather name="user" size={21} color={color} />
             ),
+        }}
+      />
+      <Tabs.Screen
+        name="analysis"
+        options={{
+          title: 'AI Analysis',
+          tabBarIcon: ({ color }) => <Feather name="crosshair" size={21} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="digital-twin"
+        options={{
+          title: 'Digital Twin',
+          tabBarIcon: ({ color }) => <Feather name="activity" size={21} color={color} />,
         }}
       />
     </Tabs>

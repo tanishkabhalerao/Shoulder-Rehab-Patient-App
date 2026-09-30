@@ -1,0 +1,1 @@
+export { ExercisePlansScreen as default } from '@/src/screens/physio';

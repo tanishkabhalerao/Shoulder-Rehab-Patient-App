@@ -1,0 +1,1 @@
+export { PhysiotherapistProfileScreen as default } from '@/src/screens/physio';
